@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🚜 Tractor Tycoon</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #2e7d32;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      color: #1b5e20;
+    }
+
+    header {
+      background-color: #1b5e20;
+      color: white;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 20;
+    }
+
+    header h1 {
+      font-size: 17px;
+    }
+
+    .top-stats {
+      display: flex;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 13px;
+      align-items: center;
+    }
+
+    .stat-pill {
+      background-color: rgba(255,255,255,0.18);
+      padding: 4px 10px;
+      border-radius: 16px;
+    }
+
+    .portal-back-btn {
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .seed-bar {
+      background-color: #c8e6c9;
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      justify-content: center;
+      border-bottom: 2px solid #81c784;
+      z-index: 20;
+    }
+
+    .seed-btn {
+      background-color: white;
+      border: 2px solid #66bb6a;
+      border-radius: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      color: #1b5e20;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .seed-btn.selected {
+      background-color: #ffeb3b;
+      border-color: #fbc02d;
+      transform: scale(1.05);
+    }
+
+    .seed-btn.locked {
+      background-color: #eeeeee;
+      border-color: #bdbdbd;
+      color: #757575;
+    }
+
+    #world-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #388e3c;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    canvas {
+      background-color: #66bb6a;
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .controls-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.55);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #station-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      max-height: 82vh;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .modal-header {
+      background: #2e7d32;
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background-color: #f5f5f5;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .card-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-emoji {
+      font-size: 28px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #212121;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    .action-btn {
+      background-color: #43a047;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 18px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .action-btn:disabled {
+      background-color: #bdbdbd;
+      cursor: not-allowed;
+    }
+
+    .toggle-btn {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 18px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      color: white;
+    }
+
+    .toggle-btn.on {
+      background-color: #2e7d32;
+    }
+
+    .toggle-btn.off {
+      background-color: #e53935;
+    }
+
+    .reset-btn-small {
+      background-color: #ffebee;
+      border: 1px solid #ef9a9a;
+      color: #c62828;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="header-title">🚜 Tractor Tycoon</h1>
+    <div class="top-stats" id="header-stats">
+      <div id="portal-btn-container"></div>
+      <div class="stat-pill" id="cash-display">💰 $150</div>
+      <div class="stat-pill" id="trailer-display">🚛 0 / 10</div>
+    </div>
+  </header>
+
+  <div class="seed-bar" id="seed-bar"></div>
+
+  <div id="world-wrapper">
+    <canvas id="gameCanvas" width="900" height="660"></canvas>
+    <div class="controls-hint" id="controls-hint">Drive to corners for Stations, Top Pond to Fish, Bottom Portal for Fruit World!</div>
+  </div>
+
+  <!-- Station Pop-up Modal -->
+  <div id="station-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modal-title">Station</h2>
+        <button class="close-btn" id="close-modal-btn">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- CROPS & ITEMS ---
+    const CROPS = {
+      wheat: { id: 'wheat', name: 'Wheat', emoji: '🌾', seedCost: 5, growTime: 3, sellPrice: 12, unlockCost: 0, unlocked: true, dimension: 'main' },
+      corn: { id: 'corn', name: 'Corn', emoji: '🌽', seedCost: 15, growTime: 6, sellPrice: 35, unlockCost: 100, unlocked: false, dimension: 'main' },
+      strawberry: { id: 'strawberry', name: 'Strawberry', emoji: '🍓', seedCost: 40, growTime: 10, sellPrice: 95, unlockCost: 450, unlocked: false, dimension: 'main' },
+      pumpkin: { id: 'pumpkin', name: 'Pumpkin', emoji: '🎃', seedCost: 100, growTime: 16, sellPrice: 240, unlockCost: 1500, unlocked: false, dimension: 'main' },
+      
+      banana: { id: 'banana', name: 'Banana Tree', emoji: '🍌', seedCost: 60, growTime: 8, sellPrice: 140, unlockCost: 800, unlocked: false, dimension: 'fruit' },
+      orange: { id: 'orange', name: 'Orange Tree', emoji: '🍊', seedCost: 120, growTime: 12, sellPrice: 290, unlockCost: 2000, unlocked: false, dimension: 'fruit' },
+      cherry: { id: 'cherry', name: 'Cherry Tree', emoji: '🍒', seedCost: 250, growTime: 18, sellPrice: 600, unlockCost: 5000, unlocked: false, dimension: 'fruit' },
+      watermelon: { id: 'watermelon', name: 'Watermelon Tree', emoji: '🍉', seedCost: 500, growTime: 25, sellPrice: 1300, unlockCost: 12000, unlocked: false, dimension: 'fruit' }
+    };
+
+    // 4 Tiers of Fish
+    const FISH_TYPES = [
+      { id: 'fish', name: 'Common Fish', emoji: '🐟', sellPrice: 25, tier: 1 },
+      { id: 'salmon', name: 'Silver Salmon', emoji: '🐠', sellPrice: 60, tier: 2 },
+      { id: 'trout', name: 'Golden Trout', emoji: '🐡', sellPrice: 150, tier: 3 },
+      { id: 'shark', name: 'Legendary Shark', emoji: '🦈', sellPrice: 400, tier: 4 }
+    ];
+
+    const RECIPES = [
+      { id: 'bread', name: 'Artisan Bread', emoji: '🍞', req: { wheat: 3 }, reqText: '3x 🌾 Wheat', sellPrice: 55 },
+      { id: 'grilledFish', name: 'Grilled Fish Dinner', emoji: '🍣', req: { fish: 2, corn: 1 }, reqText: '2x 🐟 Fish + 1x 🌽 Corn', sellPrice: 115 },
+      { id: 'salmonPlatter', name: 'Deluxe Salmon Platter', emoji: '🍱', req: { salmon: 2, wheat: 1 }, reqText: '2x 🐠 Salmon + 1x 🌾 Wheat', sellPrice: 180 },
+      { id: 'troutSoup', name: 'Golden Trout Chowder', emoji: '🍲', req: { trout: 1, corn: 2 }, reqText: '1x 🐡 Trout + 2x 🌽 Corn', sellPrice: 250 },
+      { id: 'sushiBoat', name: 'Shark Fin Sushi Boat', emoji: '🍱', req: { shark: 1, salmon: 1 }, reqText: '1x 🦈 Shark + 1x 🐠 Salmon', sellPrice: 600 },
+      { id: 'bananaSmoothie', name: 'Banana Smoothie', emoji: '🥤', req: { banana: 2 }, reqText: '2x 🍌 Bananas', sellPrice: 310 },
+      { id: 'citrusJuice', name: 'Fresh Orange Juice', emoji: '🧃', req: { orange: 2 }, reqText: '2x 🍊 Oranges', sellPrice: 640 },
+      { id: 'cherryPie', name: 'Cherry Tart', emoji: '🥧', req: { cherry: 2, wheat: 1 }, reqText: '2x 🍒 Cherries + 1x 🌾 Wheat', sellPrice: 1350 },
+      { id: 'fruitSalad', name: 'Exotic Fruit Salad', emoji: '🥗', req: { banana: 1, orange: 1, watermelon: 1 }, reqText: '🍌 + 🍊 + 🍉', sellPrice: 2400 },
+      { id: 'feast', name: 'Grand Harvest Feast', emoji: '🍽️', req: { trout: 1, pumpkin: 1, cherry: 1 }, reqText: '1x 🐡 + 1x 🎃 + 1x 🍒', sellPrice: 2300 }
+    ];
+
+    const PLOT_COSTS = [0, 0, 0, 0, 75, 150, 300, 500, 800, 1200, 1800, 2500, 3500, 5000, 7500, 10000];
+
+    const STATIONS = [
+      { id: 'sell', name: 'Sell Station', emoji: '🏪', x: 30, y: 25, w: 135, h: 90, color: '#ffb300' },
+      { id: 'craft', name: 'Crafting Table', emoji: '🏭', x: 735, y: 25, w: 135, h: 90, color: '#8e24aa' },
+      { id: 'garage', name: 'Tractor Garage', emoji: '🔧', x: 30, y: 545, w: 135, h: 90, color: '#e53935' },
+      { id: 'town', name: 'Town Hall', emoji: '👷', x: 735, y: 545, w: 135, h: 90, color: '#1e88e5' }
+    ];
+
+    const FRUIT_STATIONS = [
+      { id: 'craft', name: 'Fruit Crafting Table', emoji: '🏭', x: 30, y: 25, w: 160, h: 90, color: '#8e24aa' },
+      { id: 'garage', name: 'Exotic Upgrade Zone', emoji: '⚡', x: 710, y: 25, w: 160, h: 90, color: '#e53935' }
+    ];
+
+    const POND = { x: 320, y: 15, w: 260, h: 95 };
+    const DOCK = { x: 415, y: 65, w: 70, h: 75 };
+    const PORTAL = { x: 375, y: 545, w: 150, h: 95 };
+
+    const PLOT_SIZE = 64;
+    const PLOT_GAP = 10;
+    const GRID_START_X = (900 - (4 * PLOT_SIZE + 3 * PLOT_GAP)) / 2;
+    const GRID_START_Y = (660 - (4 * PLOT_SIZE + 3 * PLOT_GAP)) / 2;
+
+    let state = {
+      dimension: 'main',
+      cash: 150,
+      selectedMainSeed: 'wheat',
+      selectedFruitSeed: 'banana',
+      trailerCapacity: 10,
+      inventory: {
+        wheat: 0, corn: 0, strawberry: 0, pumpkin: 0,
+        banana: 0, orange: 0, cherry: 0, watermelon: 0,
+        fish: 0, salmon: 0, trout: 0, shark: 0,
+        bread: 0, grilledFish: 0, salmonPlatter: 0, troutSoup: 0, sushiBoat: 0,
+        bananaSmoothie: 0, citrusJuice: 0, cherryPie: 0, fruitSalad: 0, feast: 0
+      },
+      plots: Array.from({ length: 16 }, (_, i) => ({
+        unlocked: i < 4,
+        crop: null,
+        progress: 0
+      })),
+      fruitPlots: Array.from({ length: 16 }, (_, i) => ({
+        unlocked: i < 4,
+        crop: null,
+        progress: 0
+      })),
+      fishingProgress: 0,
+      staff: {
+        farmhand: { name: 'Farmhand (Auto-Harvest)', emoji: '🧑‍🌾', desc: 'Automatically harvests ripe field crops.', hired: false, active: true, cost: 300 },
+        planter: { name: 'Seed Planter (Auto-Plant)', emoji: '🌱', desc: 'Automatically plants your selected seed.', hired: false, active: true, cost: 650 },
+        fisherman: { name: 'Dock Fisherman (Auto-Fish)', emoji: '🪝', desc: 'Automatically catches fish at the dock.', hired: false, active: true, cost: 800 },
+        salesClerk: { name: 'Sales Clerk (Auto-Sell)', emoji: '💼', desc: 'Automatically sells items from your trailer.', hired: false, active: true, cost: 1200 }
+      },
+      upgrades: {
+        tractorSpeed: { name: 'Turbo Engine (Speed)', emoji: '⚡', desc: 'Increases tractor driving speed.', level: 0, baseCost: 120, scale: 1.75 },
+        trailerCap: { name: 'Bigger Trailer (+10 Space)', emoji: '🚛', desc: 'Carry more items before unloading.', level: 0, baseCost: 100, scale: 1.7 },
+        fishingGear: { name: 'Pro Fishing Rod', emoji: '🎣', desc: 'Catch fish faster (also speeds up Bot!).', level: 0, baseCost: 140, scale: 1.75 },
+        baitUpgrade: { name: 'Advanced Bait & Lures', emoji: '🦐', desc: 'Unlock rarer fish tiers (Salmon, Trout, Shark).', level: 0, baseCost: 200, scale: 2.0 },
+        cropSpeed: { name: 'Field Fertilizer', emoji: '🧪', desc: 'Crops grow 20% faster per level.', level: 0, baseCost: 150, scale: 1.8 },
+        yield: { name: 'Golden Harvester Blades', emoji: '✨', desc: '+25% chance for double harvest yield.', level: 0, baseCost: 300, scale: 2.0 }
+      }
+    };
+
+    let tractor = {
+      x: 450,
+      y: 440,
+      angle: 0,
+      baseSpeed: 3.4
+    };
+
+    let keys = {};
+    let pointerTarget = null;
+    let activeStation = null;
+    let checkDelayTimer = 0;
+
+    function getActiveSeedId() {
+      return state.dimension === 'fruit' ? state.selectedFruitSeed : state.selectedMainSeed;
+    }
+
+    function getCargoCount() {
+      return Object.values(state.inventory).reduce((a, b) => a + b, 0);
+    }
+
+    function getTractorSpeed() {
+      return tractor.baseSpeed + (state.upgrades.tractorSpeed.level * 0.75);
+    }
+
+    function getGrowSpeedMultiplier() {
+      return 1 + (state.upgrades.cropSpeed.level * 0.2);
+    }
+
+    function getFishingSpeedMultiplier() {
+      return 1 + (state.upgrades.fishingGear.level * 0.35);
+    }
+
+    function getItemDetails(key) {
+      if (CROPS[key]) return CROPS[key];
+      const fishMatch = FISH_TYPES.find(f => f.id === key);
+      if (fishMatch) return fishMatch;
+      const rec = RECIPES.find(r => r.id === key);
+      return rec || { name: key, emoji: '📦', sellPrice: 10 };
+    }
+
+    function getUpgradeCost(u) {
+      return Math.round(u.baseCost * Math.pow(u.scale, u.level));
+    }
+
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+    function updatePointer(e) {
+      if (activeStation) return;
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      pointerTarget = {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    canvas.addEventListener('mousedown', updatePointer);
+    canvas.addEventListener('mousemove', e => { if (e.buttons === 1) updatePointer(e); });
+    canvas.addEventListener('mouseup', () => { pointerTarget = null; });
+    canvas.addEventListener('touchstart', updatePointer, { passive: true });
+    canvas.addEventListener('touchmove', updatePointer, { passive: true });
+    canvas.addEventListener('touchend', () => { pointerTarget = null; });
+
+    function selectSeed(cropId) {
+      const crop = CROPS[cropId];
+      if (crop.unlocked) {
+        if (crop.dimension === 'fruit') {
+          state.selectedFruitSeed = cropId;
+        } else {
+          state.selectedMainSeed = cropId;
+        }
+        saveGame();
+        renderSeedBar();
+      } else if (state.cash >= crop.unlockCost) {
+        state.cash -= crop.unlockCost;
+        crop.unlocked = true;
+        if (crop.dimension === 'fruit') {
+          state.selectedFruitSeed = cropId;
+        } else {
+          state.selectedMainSeed = cropId;
+        }
+        saveGame();
+        updateHUD();
+        renderSeedBar();
+      }
+    }
+
+    function interactWithPlot(index) {
+      const plotsList = state.dimension === 'fruit' ? state.fruitPlots : state.plots;
+      const plot = plotsList[index];
+
+      if (!plot.unlocked) {
+        const cost = PLOT_COSTS[index];
+        if (state.cash >= cost) {
+          state.cash -= cost;
+          plot.unlocked = true;
+          saveGame();
+          updateHUD();
+        }
+        return;
+      }
+      if (plot.crop && plot.progress >= 100) {
+        harvestPlot(index);
+        return;
+      }
+      if (!plot.crop) {
+        plantPlot(index);
+      }
+    }
+
+    function plantPlot(index) {
+      const plotsList = state.dimension === 'fruit' ? state.fruitPlots : state.plots;
+      const plot = plotsList[index];
+      const seedId = getActiveSeedId();
+      const seed = CROPS[seedId];
+
+      if (!plot.unlocked || plot.crop || !seed || !seed.unlocked) return;
+      if (seed.dimension !== state.dimension) return;
+
+      if (state.cash >= seed.seedCost) {
+        state.cash -= seed.seedCost;
+        plot.crop = seed.id;
+        plot.progress = 0;
+        updateHUD();
+      }
+    }
+
+    function harvestPlot(index) {
+      const plotsList = state.dimension === 'fruit' ? state.fruitPlots : state.plots;
+      const plot = plotsList[index];
+      if (!plot.crop || plot.progress < 100) return;
+      if (getCargoCount() >= state.trailerCapacity) return;
+
+      let amount = 1;
+      if (Math.random() < state.upgrades.yield.level * 0.25) amount = 2;
+      amount = Math.min(amount, state.trailerCapacity - getCargoCount());
+
+      state.inventory[plot.crop] = (state.inventory[plot.crop] || 0) + amount;
+      plot.crop = null;
+      plot.progress = 0;
+      saveGame();
+      updateHUD();
+    }
+
+    function catchFish() {
+      if (getCargoCount() >= state.trailerCapacity) return;
+      
+      const baitLevel = state.upgrades.baitUpgrade.level;
+      const roll = Math.random() * 100;
+      
+      let caughtFishId = 'fish';
+      if (baitLevel >= 3 && roll < 10) {
+        caughtFishId = 'shark';
+      } else if (baitLevel >= 2 && roll < 25) {
+        caughtFishId = 'trout';
+      } else if (baitLevel >= 1 && roll < 50) {
+        caughtFishId = 'salmon';
+      }
+
+      let amount = 1;
+      if (Math.random() < state.upgrades.yield.level * 0.25) amount = 2;
+      amount = Math.min(amount, state.trailerCapacity - getCargoCount());
+
+      state.inventory[caughtFishId] = (state.inventory[caughtFishId] || 0) + amount;
+      state.fishingProgress = 0;
+      saveGame();
+      updateHUD();
+    }
+
+    function toggleDimension() {
+      if (state.dimension === 'main') {
+        state.dimension = 'fruit';
+        tractor.y = 160;
+      } else {
+        state.dimension = 'main';
+        tractor.y = 460;
+      }
+      saveGame();
+      renderSeedBar();
+      updateHeaderPortalBtn();
+    }
+
+    function updateHeaderPortalBtn() {
+      const container = document.getElementById('portal-btn-container');
+      if (state.dimension === 'fruit') {
+        container.innerHTML = `<button class="portal-back-btn" onclick="toggleDimension()">🌀 Exit Fruit World</button>`;
+        document.getElementById('header-title').textContent = '🍇 Exotic Fruit Dimension';
+        document.getElementById('controls-hint').textContent = 'Drive to top stations for Crafting & Upgrades, or exit back to Main Farm!';
+      } else {
+        container.innerHTML = '';
+        document.getElementById('header-title').textContent = '🚜 Tractor Tycoon';
+        document.getElementById('controls-hint').textContent = 'Drive to corners for Stations, Top Pond to Fish, Bottom Portal for Fruit World!';
+      }
+    }
+
+    function openStation(station) {
+      activeStation = station.id;
+      keys = {};
+      pointerTarget = null;
+      checkDelayTimer = 80;
+      document.getElementById('modal-title').textContent = `${station.emoji} ${station.name}`;
+      document.getElementById('station-modal').style.display = 'flex';
+      renderStationModal();
+    }
+
+    function closeModal() {
+      activeStation = null;
+      checkDelayTimer = 80;
+      document.getElementById('station-modal').style.display = 'none';
+    }
+
+    const closeBtn = document.getElementById('close-modal-btn');
+    closeBtn.onclick = closeModal;
+    closeBtn.ontouchend = (e) => { e.preventDefault(); closeModal(); };
+
+    function sellItem(itemKey, qty = 1) {
+      if ((state.inventory[itemKey] || 0) >= qty) {
+        const details = getItemDetails(itemKey);
+        state.inventory[itemKey] -= qty;
+        state.cash += details.sellPrice * qty;
+        saveGame();
+        updateHUD();
+        renderStationModal();
+      }
+    }
+
+    function sellAll() {
+      let earned = 0;
+      for (const [key, qty] of Object.entries(state.inventory)) {
+        if (qty > 0) {
+          const details = getItemDetails(key);
+          earned += details.sellPrice * qty;
+          state.inventory[key] = 0;
+        }
+      }
+      if (earned > 0) {
+        state.cash += earned;
+        saveGame();
+        updateHUD();
+        if (activeStation) renderStationModal();
+      }
+    }
+
+    function craftItem(recipeId) {
+      const recipe = RECIPES.find(r => r.id === recipeId);
+      if (!recipe) return;
+
+      for (const [reqKey, reqQty] of Object.entries(recipe.req)) {
+        if ((state.inventory[reqKey] || 0) < reqQty) return;
+      }
+
+      for (const [reqKey, reqQty] of Object.entries(recipe.req)) {
+        state.inventory[reqKey] -= reqQty;
+      }
+      state.inventory[recipe.id] = (state.inventory[recipe.id] || 0) + 1;
+      saveGame();
+      updateHUD();
+      renderStationModal();
+    }
+
+    function hireStaff(staffKey) {
+      const member = state.staff[staffKey];
+      if (!member.hired && state.cash >= member.cost) {
+        state.cash -= member.cost;
+        member.hired = true;
+        member.active = true;
+        saveGame();
+        updateHUD();
+        renderStationModal();
+      }
+    }
+
+    function toggleStaff(staffKey) {
+      const member = state.staff[staffKey];
+      if (member.hired) {
+        member.active = !member.active;
+        saveGame();
+        renderStationModal();
+      }
+    }
+
+    function buyUpgrade(upKey) {
+      const up = state.upgrades[upKey];
+      const cost = getUpgradeCost(up);
+      if (state.cash >= cost) {
+        state.cash -= cost;
+        up.level++;
+        if (upKey === 'trailerCap') {
+          state.trailerCapacity += 10;
+        }
+        saveGame();
+        updateHUD();
+        renderStationModal();
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById('cash-display').textContent = `💰 $${Math.floor(state.cash)}`;
+      const count = getCargoCount();
+      const trailerEl = document.getElementById('trailer-display');
+      trailerEl.textContent = `🚛 ${count} / ${state.trailerCapacity}`;
+      trailerEl.style.backgroundColor = count >= state.trailerCapacity ? '#d32f2f' : 'rgba(255,255,255,0.18)';
+    }
+
+    function renderSeedBar() {
+      const bar = document.getElementById('seed-bar');
+      bar.innerHTML = '';
+      const activeSeed = getActiveSeedId();
+
+      Object.values(CROPS).forEach(crop => {
+        if (crop.dimension !== state.dimension) return;
+
+        const btn = document.createElement('button');
+        if (crop.unlocked) {
+          btn.className = `seed-btn ${activeSeed === crop.id ? 'selected' : ''}`;
+          btn.innerHTML = `${crop.emoji} ${crop.name} ($${crop.seedCost})`;
+        } else {
+          btn.className = 'seed-btn locked';
+          btn.innerHTML = `🔒 ${crop.name} ($${crop.unlockCost})`;
+        }
+        btn.onclick = () => selectSeed(crop.id);
+        bar.appendChild(btn);
+      });
+    }
+
+    function renderStationModal() {
+      const body = document.getElementById('modal-body');
+      body.innerHTML = '';
+
+      if (activeStation === 'sell') {
+        const headerRow = document.createElement('div');
+        headerRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;';
+        headerRow.innerHTML = `
+          <strong>Trailer Cargo</strong>
+          <button class="action-btn" onclick="sellAll()" ${getCargoCount() === 0 ? 'disabled' : ''}>Sell All Cargo</button>
+        `;
+        body.appendChild(headerRow);
+
+        let hasItems = false;
+        for (const [key, qty] of Object.entries(state.inventory)) {
+          if (qty > 0) {
+            hasItems = true;
+            const info = getItemDetails(key);
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <div class="card-info">
+                <div class="card-emoji">${info.emoji}</div>
+                <div>
+                  <div class="card-title">${info.name} (x${qty})</div>
+                  <div class="card-sub">$${info.sellPrice} each</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="action-btn" onclick="sellItem('${key}', 1)">Sell 1</button>
+                ${qty > 1 ? `<button class="action-btn" onclick="sellItem('${key}', ${qty})">All ($${info.sellPrice * qty})</button>` : ''}
+              </div>
+            `;
+            body.appendChild(card);
+          }
+        }
+        if (!hasItems) {
+          body.innerHTML += `<p style="text-align:center; color:#757575; padding:20px;">Your trailer is empty! Harvest crops, fruits, or fish.</p>`;
+        }
+      } 
+      else if (activeStation === 'craft') {
+        RECIPES.forEach(rec => {
+          let canCraft = true;
+          for (const [reqKey, reqQty] of Object.entries(rec.req)) {
+            if ((state.inventory[reqKey] || 0) < reqQty) canCraft = false;
+          }
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="card-info">
+              <div class="card-emoji">${rec.emoji}</div>
+              <div>
+                <div class="card-title">${rec.name} (Sells for $${rec.sellPrice})</div>
+                <div class="card-sub">Requires: ${rec.reqText}</div>
+              </div>
+            </div>
+            <button class="action-btn" ${canCraft ? '' : 'disabled'} onclick="craftItem('${rec.id}')">Craft</button>
+          `;
+          body.appendChild(card);
+        });
+      } 
+      else if (activeStation === 'garage') {
+        ['tractorSpeed', 'trailerCap', 'fishingGear', 'baitUpgrade', 'cropSpeed', 'yield'].forEach(key => {
+          const up = state.upgrades[key];
+          const cost = getUpgradeCost(up);
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="card-info">
+              <div class="card-emoji">${up.emoji}</div>
+              <div>
+                <div class="card-title">${up.name} (Lv. ${up.level})</div>
+                <div class="card-sub">${up.desc}</div>
+              </div>
+            </div>
+            <button class="action-btn" ${state.cash < cost ? 'disabled' : ''} onclick="buyUpgrade('${key}')">
+              $${cost}
+            </button>
+          `;
+          body.appendChild(card);
+        });
+      } 
+      else if (activeStation === 'town') {
+        Object.entries(state.staff).forEach(([key, member]) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          
+          let buttonHtml = '';
+          if (!member.hired) {
+            buttonHtml = `<button class="action-btn" ${state.cash < member.cost ? 'disabled' : ''} onclick="hireStaff('${key}')">$${member.cost}</button>`;
+          } else {
+            const isOn = member.active !== false;
+            buttonHtml = `<button class="toggle-btn ${isOn ? 'on' : 'off'}" onclick="toggleStaff('${key}')">${isOn ? 'ON ✅' : 'OFF ⏸️'}</button>`;
+          }
+
+          card.innerHTML = `
+            <div class="card-info">
+              <div class="card-emoji">${member.emoji}</div>
+              <div>
+                <div class="card-title">${member.name}</div>
+                <div class="card-sub">${member.desc}</div>
+              </div>
+            </div>
+            ${buttonHtml}
+          `;
+          body.appendChild(card);
+        });
+
+        const resetDiv = document.createElement('div');
+        resetDiv.style.cssText = 'text-align:center; margin-top:18px; padding-top:12px; border-top:1px solid #eeeeee;';
+        resetDiv.innerHTML = `<button class="reset-btn-small" onclick="resetGame()">⚠️ Reset Farm Progress</button>`;
+        body.appendChild(resetDiv);
+      }
+    }
+
+    function isOnDock() {
+      return state.dimension === 'main' && (
+        tractor.x > DOCK.x - 10 && tractor.x < DOCK.x + DOCK.w + 10 &&
+        tractor.y > DOCK.y - 10 && tractor.y < DOCK.y + DOCK.h + 10
+      );
+    }
+
+    function updateTractor() {
+      if (activeStation) return;
+
+      if (checkDelayTimer > 0) {
+        checkDelayTimer--;
+      }
+
+      let dx = 0;
+      let dy = 0;
+      const speed = getTractorSpeed();
+
+      if (keys['w'] || keys['arrowup']) dy -= 1;
+      if (keys['s'] || keys['arrowdown']) dy += 1;
+      if (keys['a'] || keys['arrowleft']) dx -= 1;
+      if (keys['d'] || keys['arrowright']) dx += 1;
+
+      if (dx !== 0 || dy !== 0) {
+        const len = Math.hypot(dx, dy);
+        dx = (dx / len) * speed;
+        dy = (dy / len) * speed;
+        tractor.angle = Math.atan2(dy, dx);
+      } else if (pointerTarget) {
+        const dist = Math.hypot(pointerTarget.x - tractor.x, pointerTarget.y - tractor.y);
+        if (dist > 6) {
+          dx = ((pointerTarget.x - tractor.x) / dist) * speed;
+          dy = ((pointerTarget.y - tractor.y) / dist) * speed;
+          tractor.angle = Math.atan2(dy, dx);
+        }
+      }
+
+      tractor.x = Math.max(25, Math.min(canvas.width - 25, tractor.x + dx));
+      tractor.y = Math.max(25, Math.min(canvas.height - 25, tractor.y + dy));
+
+      if (checkDelayTimer === 0) {
+        if (state.dimension === 'main') {
+          const inPortal = (
+            tractor.x > PORTAL.x && tractor.x < PORTAL.x + PORTAL.w &&
+            tractor.y > PORTAL.y && tractor.y < PORTAL.y + PORTAL.h
+          );
+          if (inPortal) {
+            toggleDimension();
+            checkDelayTimer = 80;
+            return;
+          }
+        } else {
+          const inReturnPortal = tractor.y > canvas.height - 35;
+          if (inReturnPortal) {
+            toggleDimension();
+            tractor.y = 120;
+            checkDelayTimer = 80;
+            return;
+          }
+        }
+      }
+
+      const activePlots = state.dimension === 'fruit' ? state.fruitPlots : state.plots;
+      activePlots.forEach((plot, i) => {
+        const col = i % 4;
+        const row = Math.floor(i / 4);
+        const px = GRID_START_X + col * (PLOT_SIZE + PLOT_GAP);
+        const py = GRID_START_Y + row * (PLOT_SIZE + PLOT_GAP);
+
+        if (
+          tractor.x > px && tractor.x < px + PLOT_SIZE &&
+          tractor.y > py && tractor.y < py + PLOT_SIZE
+        ) {
+          interactWithPlot(i);
+        }
+      });
+
+      if (checkDelayTimer === 0) {
+        const activeStationsList = state.dimension === 'fruit' ? FRUIT_STATIONS : STATIONS;
+        let touchingStation = null;
+        for (const st of activeStationsList) {
+          if (
+            tractor.x > st.x && tractor.x < st.x + st.w &&
+            tractor.y > st.y && tractor.y < st.y + st.h
+          ) {
+            touchingStation = st;
+            break;
+          }
+        }
+
+        if (touchingStation) {
+          openStation(touchingStation);
+        }
+      }
+    }
+
+    function drawWorld() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (state.dimension === 'main') {
+        ctx.strokeStyle = '#c5e1a5';
+        ctx.lineWidth = 34;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(95, 70);
+        ctx.lineTo(450, 330);
+        ctx.lineTo(800, 70);
+        ctx.moveTo(95, 590);
+        ctx.lineTo(450, 330);
+        ctx.lineTo(800, 590);
+        ctx.moveTo(450, 120);
+        ctx.lineTo(450, 560);
+        ctx.stroke();
+
+        ctx.fillStyle = '#29b6f6';
+        ctx.fillRect(POND.x, POND.y, POND.w, POND.h);
+        ctx.strokeStyle = '#0288d1';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(POND.x, POND.y, POND.w, POND.h);
+        ctx.font = '20px sans-serif';
+        ctx.fillText('🐟', POND.x + 50, POND.y + 45);
+
+        ctx.fillStyle = '#8d6e63';
+        ctx.fillRect(DOCK.x, DOCK.y, DOCK.w, DOCK.h);
+        ctx.strokeStyle = '#4e342e';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(DOCK.x, DOCK.y, DOCK.w, DOCK.h);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎣 Dock', DOCK.x + DOCK.w / 2, DOCK.y + 45);
+
+        const fishermanBotActive = state.staff.fisherman.hired && state.staff.fisherman.active;
+        if ((isOnDock() || fishermanBotActive) && getCargoCount() < state.trailerCapacity) {
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.fillRect(DOCK.x + 5, DOCK.y - 14, DOCK.w - 10, 8);
+          ctx.fillStyle = '#00e5ff';
+          ctx.fillRect(DOCK.x + 5, DOCK.y - 14, (DOCK.w - 10) * (state.fishingProgress / 100), 8);
+        }
+
+        ctx.fillStyle = '#ab47bc';
+        ctx.fillRect(PORTAL.x, PORTAL.y, PORTAL.w, PORTAL.h);
+        ctx.strokeStyle = '#ffeb3b';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(PORTAL.x, PORTAL.y, PORTAL.w, PORTAL.h);
+        ctx.font = '28px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🌀 🍎 🌀', PORTAL.x + PORTAL.w / 2, PORTAL.y + 40);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('Fruit World Portal', PORTAL.x + PORTAL.w / 2, PORTAL.y + 72);
+
+        STATIONS.forEach(st => {
+          ctx.fillStyle = st.color;
+          ctx.fillRect(st.x, st.y, st.w, st.h);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'white';
+          ctx.strokeRect(st.x, st.y, st.w, st.h);
+          ctx.font = '28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(st.emoji, st.x + st.w / 2, st.y + 38);
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillText(st.name, st.x + st.w / 2, st.y + 70);
+        });
+
+      } else {
+        ctx.fillStyle = '#4a148c';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#ff9800';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🌀 DRIVE DOWN TO RETURN TO MAIN FARM 🌀', canvas.width / 2, canvas.height - 15);
+
+        FRUIT_STATIONS.forEach(st => {
+          ctx.fillStyle = st.color;
+          ctx.fillRect(st.x, st.y, st.w, st.h);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'white';
+          ctx.strokeRect(st.x, st.y, st.w, st.h);
+          ctx.font = '26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(st.emoji, st.x + st.w / 2, st.y + 36);
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillText(st.name, st.x + st.w / 2, st.y + 68);
+        });
+      }
+
+      const activePlots = state.dimension === 'fruit' ? state.fruitPlots : state.plots;
+      activePlots.forEach((plot, i) => {
+        const col = i % 4;
+        const row = Math.floor(i / 4);
+        const px = GRID_START_X + col * (PLOT_SIZE + PLOT_GAP);
+        const py = GRID_START_Y + row * (PLOT_SIZE + PLOT_GAP);
+
+        if (!plot.unlocked) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+          ctx.strokeStyle = state.dimension === 'fruit' ? '#ffeb3b' : '#a5d6a7';
+          ctx.lineWidth = 2;
+          ctx.fillRect(px, py, PLOT_SIZE, PLOT_SIZE);
+          ctx.strokeRect(px, py, PLOT_SIZE, PLOT_SIZE);
+
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Buy Plot', px + PLOT_SIZE / 2, py + 26);
+          ctx.fillText(`$${PLOT_COSTS[i]}`, px + PLOT_SIZE / 2, py + 42);
+        } else {
+          const isRipe = plot.crop && plot.progress >= 100;
+          
+          if (state.dimension === 'fruit') {
+            ctx.fillStyle = '#5d4037';
+            ctx.fillRect(px + PLOT_SIZE/2 - 6, py + PLOT_SIZE/2, 12, PLOT_SIZE/2 - 4);
+          }
+
+          ctx.fillStyle = isRipe ? (state.dimension === 'fruit' ? '#689f38' : '#a1887f') : (state.dimension === 'fruit' ? '#33691e' : '#795548');
+          ctx.strokeStyle = isRipe ? '#ffeb3b' : '#4e342e';
+          ctx.lineWidth = isRipe ? 3 : 2;
+          
+          if (state.dimension === 'fruit') {
+            ctx.beginPath();
+            ctx.arc(px + PLOT_SIZE/2, py + PLOT_SIZE/2 - 4, PLOT_SIZE/2 - 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            ctx.fillRect(px, py, PLOT_SIZE, PLOT_SIZE);
+            ctx.strokeRect(px, py, PLOT_SIZE, PLOT_SIZE);
+          }
+
+          if (plot.crop) {
+            const crop = CROPS[plot.crop];
+            const icon = plot.progress < 40 ? '🌱' : (isRipe ? crop.emoji : (state.dimension === 'fruit' ? '🌳' : '🌿'));
+            ctx.font = '28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(icon, px + PLOT_SIZE / 2, py + (state.dimension === 'fruit' ? 28 : 38));
+
+            if (!isRipe) {
+              ctx.fillStyle = 'rgba(0,0,0,0.4)';
+              ctx.fillRect(px + 8, py + PLOT_SIZE - 12, PLOT_SIZE - 16, 6);
+              ctx.fillStyle = '#76ff03';
+              ctx.fillRect(px + 8, py + PLOT_SIZE - 12, (PLOT_SIZE - 16) * (plot.progress / 100), 6);
+            }
+          }
+        }
+      });
+
+      ctx.save();
+      ctx.translate(tractor.x, tractor.y);
+      
+      if (getCargoCount() >= state.trailerCapacity) {
+        ctx.strokeStyle = '#ff1744';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 26, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      if (Math.cos(tractor.angle) > 0) {
+        ctx.scale(-1, 1);
+      }
+      ctx.font = '36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🚜', 0, 0);
+      ctx.restore();
+
+      if (getCargoCount() >= state.trailerCapacity) {
+        ctx.fillStyle = '#ffeb3b';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('TRAILER FULL!', tractor.x, tractor.y - 28);
+      }
+    }
+
+    function saveGame() {
+      const saveObj = {
+        state,
+        unlockedCrops: Object.fromEntries(Object.entries(CROPS).map(([k, v]) => [k, v.unlocked]))
+      };
+      localStorage.setItem('farmTractorTycoonPortalSaveV9', JSON.stringify(saveObj));
+    }
+
+    function loadGame() {
+      const raw = localStorage.getItem('farmTractorTycoonPortalSaveV9') || localStorage.getItem('farmTractorTycoonPortalSaveV8');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.state) {
+            // Merge staff carefully so existing hires & new properties stay intact
+            const mergedStaff = { ...state.staff };
+            if (parsed.state.staff) {
+              for (const k of Object.keys(mergedStaff)) {
+                if (parsed.state.staff[k]) {
+                  mergedStaff[k] = {
+                    ...mergedStaff[k],
+                    hired: parsed.state.staff[k].hired || false,
+                    active: parsed.state.staff[k].active !== undefined ? parsed.state.staff[k].active : true
+                  };
+                }
+              }
+            }
+
+            state = {
+              ...state,
+              ...parsed.state,
+              selectedMainSeed: parsed.state.selectedMainSeed || 'wheat',
+              selectedFruitSeed: parsed.state.selectedFruitSeed || 'banana',
+              inventory: { ...state.inventory, ...(parsed.state.inventory || {}) },
+              staff: mergedStaff,
+              upgrades: { ...state.upgrades, ...(parsed.state.upgrades || {}) },
+              fruitPlots: parsed.state.fruitPlots || state.fruitPlots
+            };
+          }
+          if (parsed.unlockedCrops) {
+            for (const [k, isUnlocked] of Object.entries(parsed.unlockedCrops)) {
+              if (CROPS[k]) CROPS[k].unlocked = isUnlocked;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load save', e);
+        }
+      }
+    }
+
+    function resetGame() {
+      if (confirm('Are you sure you want to reset your entire farm?')) {
+        localStorage.removeItem('farmTractorTycoonPortalSaveV9');
+        localStorage.removeItem('farmTractorTycoonPortalSaveV8');
+        location.reload();
+      }
+    }
+
+    function gameLoop() {
+      updateTractor();
+      drawWorld();
+      requestAnimationFrame(gameLoop);
+    }
+
+    let autoTick = 0;
+    setInterval(() => {
+      const cropMult = getGrowSpeedMultiplier();
+      const fishMult = getFishingSpeedMultiplier();
+
+      [state.plots, state.fruitPlots].forEach(plotsList => {
+        plotsList.forEach(plot => {
+          if (plot.unlocked && plot.crop && plot.progress < 100) {
+            const crop = CROPS[plot.crop];
+            const increment = (100 / (crop.growTime * 5)) * cropMult;
+            plot.progress = Math.min(100, plot.progress + increment);
+          }
+        });
+      });
+
+      const fishermanActive = state.staff.fisherman.hired && state.staff.fisherman.active;
+      if (isOnDock() && getCargoCount() < state.trailerCapacity) {
+        state.fishingProgress += 8 * fishMult;
+        if (state.fishingProgress >= 100) {
+          catchFish();
+        }
+      } else if (!fishermanActive) {
+        state.fishingProgress = Math.max(0, state.fishingProgress - 4);
+      }
+
+      autoTick++;
+      if (autoTick >= 5) {
+        autoTick = 0;
+
+        // 1. Auto-Harvest Bot
+        if (state.staff.farmhand.hired && state.staff.farmhand.active) {
+          [state.plots, state.fruitPlots].forEach(plotsList => {
+            plotsList.forEach((plot, idx) => {
+              if (plot.unlocked && plot.crop && plot.progress >= 100 && getCargoCount() < state.trailerCapacity) {
+                const prevDim = state.dimension;
+                state.dimension = plotsList === state.fruitPlots ? 'fruit' : 'main';
+                harvestPlot(idx);
+                state.dimension = prevDim;
+              }
+            });
+          });
+        }
+
+        // 2. Auto-Plant Bot (uses each world's saved seed!)
+        if (state.staff.planter.hired && state.staff.planter.active) {
+          [state.plots, state.fruitPlots].forEach(plotsList => {
+            const isFruitDim = plotsList === state.fruitPlots;
+            const worldSeedId = isFruitDim ? state.selectedFruitSeed : state.selectedMainSeed;
+            const seed = CROPS[worldSeedId];
+
+            plotsList.forEach((plot) => {
+              if (plot.unlocked && !plot.crop && seed && seed.unlocked && state.cash >= seed.seedCost) {
+                state.cash -= seed.seedCost;
+                plot.crop = seed.id;
+                plot.progress = 0;
+              }
+            });
+          });
+          updateHUD();
+        }
+
+        // 3. Auto-Fish Bot (affected by Fishing Speed upgrade!)
+        if (fishermanActive && getCargoCount() < state.trailerCapacity) {
+          state.fishingProgress += 25 * fishMult;
+          if (state.fishingProgress >= 100) {
+            catchFish();
+          }
+        }
+
+        // 4. Auto-Sell Bot
+        if (state.staff.salesClerk.hired && state.staff.salesClerk.active && getCargoCount() > 0) {
+          sellAll();
+        }
+      }
+    }, 200);
+
+    setInterval(saveGame, 10000);
+
+    loadGame();
+    updateHUD();
+    renderSeedBar();
+    updateHeaderPortalBtn();
+    gameLoop();
+  </script>
+</body>
+</html>
